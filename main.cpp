@@ -7,13 +7,25 @@ using namespace tao::pegtl;
 
 namespace {
 
+struct lparen : one<'('> {};
+struct rparen : one<')'> {};
+
 struct space : plus<one<' ', '\t'>> {};
 struct newline : one<'\n'> {};
 struct identifier : seq<identifier_first, star<identifier_other>> {};
 
-struct unquoted_argument : plus<ascii::not_one<'(', ')', '#', '\\', '\'', '>'>> {};
+struct line_ending : newline {};
+
+struct separation : sor<space, line_ending> {};
+
+struct unquoted_argument :
+        plus<ascii::not_one<'(', ')', '#', '\\', '\'', '>', ' ', '\t'>> {};
 struct argument : unquoted_argument {};
-struct arguments : opt<argument> {};
+struct arguments;
+struct separated_arguments :
+        sor<seq<plus<separation>, opt<argument>>,
+            seq<star<separation>, lparen, arguments, rparen>> {};
+struct arguments : seq<opt<argument>, star<separated_arguments>> {};
 
 struct command_invocation :
         seq<star<space>, identifier, star<space>, one<'('>, arguments, one<')'>> {};
@@ -51,7 +63,7 @@ struct my_action<argument> {
 };
 
 constexpr std::string_view str{
-        "identifier(test) Another_one() _this_too(Hello) 5not_this()"};
+        "identifier(arg1 arg2) Another_one() _this_too(Hello) 5not_this()"};
 
 } // namespace
 
@@ -68,13 +80,13 @@ int main(int argc, char **argv) {
 
     std::cout << "Identifiers:";
     for (const auto &i : s.identifiers) {
-        std::cout << ' ' << i;
+        std::cout << ' ' << i << ',';
     }
 
     std::cout << '\n' << "Arguments:";
 
     for (const auto &i : s.arguments) {
-        std::cout << ' ' << i;
+        std::cout << ' ' << i << ',';
     }
 
     std::cout << std::endl;
