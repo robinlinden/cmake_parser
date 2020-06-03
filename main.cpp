@@ -38,9 +38,13 @@ struct file : star<file_element> {};
 
 namespace {
 
-struct my_state {
-    std::vector<std::string> identifiers{};
+struct command_invocation {
+    std::string identifier{};
     std::vector<std::string> arguments{};
+};
+
+struct my_state {
+    std::vector<command_invocation> calls{};
 };
 
 template<typename Rule>
@@ -52,7 +56,7 @@ struct my_action<grammar::identifier> {
     static void apply(
             const Input &in,
             my_state *s) {
-        s->identifiers.push_back(in.string());
+        s->calls.push_back(command_invocation{in.string()});
     }
 };
 
@@ -62,12 +66,24 @@ struct my_action<grammar::argument> {
     static void apply(
             const Input &in,
             my_state *s) {
-        s->arguments.push_back(in.string());
+        s->calls.back().arguments.push_back(in.string());
     }
 };
 
 constexpr std::string_view str{
         "identifier(arg1 arg2) Another_one() _this_too(Hello) 5not_this()"};
+
+std::ostream& operator<<(std::ostream &os, const my_state &s) {
+    for (const auto &call : s.calls) {
+        os << call.identifier;
+        for (const auto &arg : call.arguments) {
+            os << " " << arg;
+        }
+        os << '\n';
+    }
+
+    return os;
+}
 
 } // namespace
 
@@ -82,18 +98,7 @@ int main(int argc, char **argv) {
         parse<grammar::file, my_action>(in, &s);
     }
 
-    std::cout << "Identifiers:";
-    for (const auto &i : s.identifiers) {
-        std::cout << ' ' << i << ',';
-    }
-
-    std::cout << '\n' << "Arguments:";
-
-    for (const auto &i : s.arguments) {
-        std::cout << ' ' << i << ',';
-    }
-
-    std::cout << std::endl;
+    std::cout << s;
 
     return 0;
 }
