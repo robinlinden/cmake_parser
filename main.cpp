@@ -5,7 +5,7 @@
 
 using namespace tao::pegtl;
 
-namespace {
+namespace grammar {
 
 struct lparen : one<'('> {};
 struct rparen : one<')'> {};
@@ -34,6 +34,10 @@ struct file_element : seq<command_invocation> {};
 
 struct file : star<file_element> {};
 
+} // namespace grammar
+
+namespace {
+
 struct my_state {
     std::vector<std::string> identifiers{};
     std::vector<std::string> arguments{};
@@ -43,7 +47,7 @@ template<typename Rule>
 struct my_action : nothing<Rule> {};
 
 template<>
-struct my_action<identifier> {
+struct my_action<grammar::identifier> {
     template<typename Input>
     static void apply(
             const Input &in,
@@ -53,7 +57,7 @@ struct my_action<identifier> {
 };
 
 template<>
-struct my_action<argument> {
+struct my_action<grammar::argument> {
     template<typename Input>
     static void apply(
             const Input &in,
@@ -72,10 +76,10 @@ int main(int argc, char **argv) {
 
     if (argc > 1) {
         argv_input<> in(argv, 1);
-        parse<file, my_action>(in, &s);
+        parse<grammar::file, my_action>(in, &s);
     } else {
         memory_input<> in(str.begin(), str.end(), "");
-        parse<file, my_action>(in, &s);
+        parse<grammar::file, my_action>(in, &s);
     }
 
     std::cout << "Identifiers:";
