@@ -1,0 +1,3 @@
+add_executable(argv_parser argv_parser.cpp)
+target_link_libraries(argv_parser PRIVATE some_project pegtl)
+target_compile_features(argv_parser PRIVATE cxx_std_17)
