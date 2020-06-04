@@ -21,6 +21,16 @@ struct my_state {
     std::vector<command_invocation> calls{};
 };
 
+bool operator==(
+        const parser::command_invocation &lhs,
+        const parser::command_invocation &rhs) {
+    return lhs.identifier == rhs.identifier && lhs.arguments == rhs.arguments;
+}
+
+bool operator==(const parser::my_state &lhs, const parser::my_state &rhs) {
+    return lhs.calls == rhs.calls;
+}
+
 template<typename Rule>
 struct my_action : peg::nothing<Rule> {};
 

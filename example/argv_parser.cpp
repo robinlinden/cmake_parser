@@ -3,12 +3,8 @@
 #include <tao/pegtl.hpp>
 
 #include <iostream>
-#include <string_view>
 
 namespace {
-
-constexpr std::string_view str{
-        "identifier(arg1 arg2) Another_one() _this_too(Hello) 5not_this()"};
 
 std::ostream& operator<<(std::ostream &os, const parser::my_state &s) {
     for (const auto &call : s.calls) {
@@ -25,16 +21,12 @@ std::ostream& operator<<(std::ostream &os, const parser::my_state &s) {
 } // namespace
 
 int main(int argc, char **argv) {
-    parser::my_state s;
-
-    if (argc > 1) {
-        tao::pegtl::argv_input<> in(argv, 1);
-        s = parser::parse(&in);
-    } else {
-        tao::pegtl::memory_input<> in(str.begin(), str.end(), "");
-        s = parser::parse(&in);
+    if (argc != 2) {
+        return 1;
     }
 
+    tao::pegtl::argv_input<> in(argv, 1);
+    parser::my_state s = parser::parse(&in);
     std::cout << s;
 
     return 0;
