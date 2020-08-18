@@ -38,7 +38,7 @@ struct arguments : seq<opt<argument>, star<separated_arguments>> {};
 struct command_invocation :
         seq<star<space>, identifier, star<space>, one<'('>, arguments, one<')'>> {};
 
-struct file_element : seq<command_invocation> {};
+struct file_element : seq<command_invocation, line_ending> {};
 
 struct file : star<file_element> {};
 

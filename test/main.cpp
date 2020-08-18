@@ -9,7 +9,7 @@
 namespace {
 
 constexpr std::string_view str{
-        "identifier(arg1 arg2) Another_one() _this_too(Hello) 5not_this()"};
+        "identifier(arg1 arg2)\nAnother_one()\n_this_too(Hello)\n5not_this()"};
 
 TEST_CASE("Function calls can be parsed") {
     tao::pegtl::memory_input<> in(str.begin(), str.end(), "");
